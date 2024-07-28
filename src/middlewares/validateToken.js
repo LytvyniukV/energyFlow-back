@@ -1,31 +1,36 @@
-import jwt from 'jsonwebtoken';
 import HttpError from '../helpers/httpError.js';
 import { User } from '../models/users.js';
-import { SECRET_KEY } from '../constants/index.js';
+import { Sessions } from '../models/session.js';
 
-export const validateToken = (req, res, next) => {
+export const validateToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) throw HttpError(401);
 
   const [bearer, token] = authHeader.split(' ', 2);
   if (bearer !== 'Bearer') throw HttpError(401);
 
-  jwt.verify(token, SECRET_KEY, verifyCallback);
+  const session = await Sessions.findOne({ accessToken: token });
 
-  async function verifyCallback(err, decode) {
-    if (err) next(HttpError(401));
-
-    try {
-      const user = await User.findById(decode.id);
-      if (!user || user.accessToken !== token) throw HttpError(401);
-
-      req.user = {
-        id: user._id,
-        email: user.email,
-      };
-      next();
-    } catch (error) {
-      next(error);
-    }
+  if (!session) {
+    next(HttpError(401, 'Session not found'));
+    return;
   }
+
+  const isAccessTokenExpired =
+    new Date() > new Date(session.accessTokenValidUntil);
+
+  if (isAccessTokenExpired) {
+    next(HttpError(401, 'Access token expired'));
+  }
+
+  const user = await User.findById(session.userId);
+
+  if (!user) {
+    next(createHttpError(401));
+    return;
+  }
+
+  req.user = user;
+
+  next();
 };

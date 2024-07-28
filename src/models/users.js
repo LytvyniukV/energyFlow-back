@@ -11,10 +11,6 @@ const users = new Schema(
       type: String,
       require: [true, 'Password is required'],
     },
-    accessToken: {
-      type: String,
-      default: null,
-    },
   },
   { timestamps: true, versionKey: false },
 );

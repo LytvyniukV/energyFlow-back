@@ -3,7 +3,7 @@ import validator from '../helpers/validator.js';
 import wrapper from '../helpers/wrapper.js';
 import controller from '../controllers/users.js';
 import { authSchema } from '../schemas/users.js';
-import { validateToken } from '../middlewares/validateToken.js';
+
 const router = express.Router();
 
 router.post(
@@ -18,5 +18,9 @@ router.post(
   wrapper(controller.loginUser),
 );
 
-router.post('/logout', validateToken, wrapper(controller.logout));
+router.post('/logout', wrapper(controller.logout));
+
+router.post('/refresh', wrapper(controller.refreshUserSession));
+router.get('/current', wrapper(controller.current));
+
 export default router;
