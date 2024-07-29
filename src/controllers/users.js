@@ -61,7 +61,7 @@ const refreshUserSession = async (req, res) => {
 };
 
 const current = async (req, res) => {
-  const user = await userServices.current(req.cookies.accessToken);
+  const user = await userServices.current(req.user._id);
   res.status(200).json({
     message: 'Success',
     data: {

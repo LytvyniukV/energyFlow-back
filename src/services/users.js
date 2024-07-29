@@ -73,8 +73,8 @@ const refreshUsersSession = async ({ sessionId, refreshToken }) => {
   });
 };
 
-const current = async (token) => {
-  return await User.findOne({ accessToken: token });
+const current = async (id) => {
+  return await User.findById(id);
 };
 export default {
   registerUser,
