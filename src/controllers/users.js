@@ -1,4 +1,5 @@
 import { ONE_DAY } from '../constants/index.js';
+
 import { setupSession } from '../middlewares/createSession.js';
 import userServices from '../services/users.js';
 
@@ -77,7 +78,16 @@ const current = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-  const user = await userServices.updateUser(req.user._id, req.body);
+  let avatar;
+
+  if (req.file) {
+    avatar = req.file.path;
+  }
+
+  const user = await userServices.updateUser(req.user._id, {
+    ...req.body,
+    avatarURL: avatar,
+  });
 
   res.status(200).json({
     message: 'User updated',

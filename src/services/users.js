@@ -35,10 +35,10 @@ const loginUser = async (payload) => {
   await Sessions.deleteOne({ userId: user._id });
 
   const accessToken = jwt.sign({ id: user._id }, SECRET_KEY, {
-    expiresIn: '15m',
+    expiresIn: '3h',
   });
   const refreshToken = jwt.sign({ id: user._id }, SECRET_KEY, {
-    expiresIn: '20m',
+    expiresIn: '5h',
   });
 
   return await Sessions.create({

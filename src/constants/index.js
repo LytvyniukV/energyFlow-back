@@ -9,3 +9,8 @@ export const SECRET_KEY = process.env.SECRET_KEY;
 export const FIFTEEN_MINUTES = 15 * 60 * 1000;
 export const ONE_DAY = 24 * 60 * 60 * 1000;
 export const SEND_GRID_TOKEN = process.env.SEND_GRID_API_KEY;
+export const CLOUDINARY = {
+  CLOUD_NAME: process.env.CLOUD_NAME,
+  API_KEY: process.env.CLOUDINARY_KEY,
+  API_SECRET: process.env.CLOUDINARY_SECRET,
+};

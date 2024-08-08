@@ -17,6 +17,15 @@ export const updUser = Joi.object({
   activeTime: Joi.number().min(1),
   weight: Joi.number().min(1),
   liters: Joi.number().min(1),
+  avatar: Joi.object({
+    type: Joi.string().valid(
+      'image/png',
+      'image/jpg',
+      'image/jpeg',
+      'image/webp',
+      'image/svg',
+    ),
+  }).unknown(true),
 }).min(1);
 
 export const resetEmailSchema = Joi.object({

@@ -9,6 +9,7 @@ import {
   updUser,
 } from '../schemas/users.js';
 import { validateToken } from '../middlewares/validateToken.js';
+import { upload } from '../helpers/cloudinary.js';
 
 const router = express.Router();
 
@@ -32,6 +33,7 @@ router.get('/current', validateToken, wrapper(controller.current));
 router.patch(
   '/',
   validateToken,
+  upload.single('avatar'),
   validator.body(updUser),
   wrapper(controller.updateUser),
 );

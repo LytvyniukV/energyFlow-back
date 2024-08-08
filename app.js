@@ -5,10 +5,13 @@ import router from './src/routes/index.js';
 import cookieParser from 'cookie-parser';
 
 const app = express();
-app.use(logger('dev'), cors());
+
 app.use(cors());
+app.use(logger('dev'));
+
 app.use(express.json());
 app.use(cookieParser());
+
 app.use('/api', router);
 
 app.use((_, res) => {
