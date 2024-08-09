@@ -1,10 +1,10 @@
 import services from '../services/exercises.js';
 
 const getAll = async (req, res) => {
-  const exercises = await services.getAll();
+  const exercises = await services.getAll(req.query);
   res.status(200).json({
     message: 'Success',
-    data: exercises,
+    ...exercises,
   });
 };
 
