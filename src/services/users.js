@@ -6,6 +6,7 @@ import { FIFTEEN_MINUTES, ONE_DAY, SECRET_KEY } from '../constants/index.js';
 import { Sessions } from '../models/session.js';
 import { createSession } from '../middlewares/createSession.js';
 import sendEmail from '../helpers/sendEmail.js';
+import { Exercises } from '../models/exercises.js';
 
 const registerUser = async (payload) => {
   const user = await User.findOne({ email: payload.email });
@@ -163,6 +164,45 @@ const resetPassword = async (payload) => {
 
   await User.findByIdAndUpdate(user._id, { password: encryptedPassword });
 };
+
+const toggleFavorites = async (userId, exerciseId) => {
+  const user = await User.findById(userId);
+  if (!user) throw HttpError(404, 'User not found');
+
+  const exercise = await Exercises.findById(exerciseId);
+  if (!exercise) throw HttpError(404, 'Exercise not found');
+
+  let favorites = user.favoriteExercises;
+
+  let newExercise = {
+    id: exerciseId,
+    name: exercise.name,
+    bodyPart: exercise.bodyPart,
+    equipment: exercise.equipment,
+    gifUrl: exercise.gifUrl,
+    target: exercise.target,
+    description: exercise.description,
+    rating: exercise.rating,
+    burnedCalories: exercise.burnedCalories,
+    time: exercise.time,
+    popularity: exercise.popularity,
+  };
+  const isInclude = user.favoriteExercises.some((item) => {
+    return item.id === exerciseId;
+  });
+
+  if (!isInclude) {
+    favorites?.push(newExercise);
+  } else {
+    favorites = user.favoriteExercises.filter((item) => item.id !== exerciseId);
+  }
+
+  return await User.findByIdAndUpdate(
+    userId,
+    { favoriteExercises: favorites },
+    { new: true },
+  );
+};
 export default {
   registerUser,
   loginUser,
@@ -175,4 +215,5 @@ export default {
   verifyEmail,
   extraVerifyEmail,
   resetPassword,
+  toggleFavorites,
 };

@@ -16,4 +16,4 @@ const exercises = new Schema(
   { versionKey: false },
 );
 
-export const Exercise = model('Exercise', exercises);
+export const Exercises = model('Exercise', exercises);

@@ -2,6 +2,7 @@ import { ONE_DAY } from '../constants/index.js';
 
 import { setupSession } from '../middlewares/createSession.js';
 import userServices from '../services/users.js';
+import exercisesServices from '../services/exercises.js';
 
 const registerUser = async (req, res) => {
   const user = await userServices.registerUser(req.body);
@@ -140,6 +141,15 @@ const resetPassword = async (req, res) => {
     data: {},
   });
 };
+
+const toggleFavorites = async (req, res) => {
+  const user = await userServices.toggleFavorites(req.user._id, req.params.id);
+
+  res.status(200).json({
+    message: 'Favorites updated',
+    data: user.favoriteExercises,
+  });
+};
 export default {
   registerUser,
   loginUser,
@@ -152,4 +162,5 @@ export default {
   verifyEmail,
   extraVerifyEmail,
   resetPassword,
+  toggleFavorites,
 };

@@ -59,4 +59,6 @@ router.post(
   validator.body(resetPasswordSchema),
   wrapper(controller.resetPassword),
 );
+
+router.patch('/:id', validateToken, controller.toggleFavorites);
 export default router;

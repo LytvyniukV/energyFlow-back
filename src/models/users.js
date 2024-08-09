@@ -37,7 +37,7 @@ const users = new Schema(
       default: null,
     },
     favoriteExercises: {
-      type: [String],
+      type: [Object],
       default: [],
     },
     verify: {
