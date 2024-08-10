@@ -1,5 +1,4 @@
 import { Schema, model } from 'mongoose';
-import paginate from 'mongoose-paginate-v2';
 
 const exercises = new Schema(
   {
@@ -16,7 +15,5 @@ const exercises = new Schema(
   },
   { versionKey: false },
 );
-
-exercises.plugin(paginate);
 
 export const Exercises = model('Exercise', exercises);

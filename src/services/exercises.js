@@ -1,4 +1,5 @@
 import { calculatePaginationData } from '../helpers/calculatePaginationData.js';
+import HttpError from '../helpers/httpError.js';
 import { Exercises } from '../models/exercises.js';
 
 const getAll = async (queryParams) => {
@@ -25,6 +26,8 @@ const getAll = async (queryParams) => {
     exercisesQuery.skip(skip).limit(limit).exec(),
   ]);
 
+  if (!exercises) throw HttpError(404, 'Exercises not found');
+
   if (q) {
     exercises = exercises.filter((item) => {
       return (
@@ -43,4 +46,12 @@ const getAll = async (queryParams) => {
   };
 };
 
-export default { getAll };
+const getById = async (id) => {
+  const exercise = await Exercises.findById(id);
+
+  if (!exercise) throw HttpError(404, 'Exercise not found');
+
+  return exercise;
+};
+
+export default { getAll, getById };

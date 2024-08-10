@@ -19,6 +19,6 @@ router.patch(
 
 router.delete('/', wrapper(controller.deleteUser));
 
-router.patch('/:id', isValidId, controller.toggleFavorites);
+router.patch('/:id', isValidId, wrapper(controller.toggleFavorites));
 
 export default router;
