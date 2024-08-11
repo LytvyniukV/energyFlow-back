@@ -16,3 +16,6 @@ export const CLOUDINARY = {
 };
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 export const GOOGLE_SECRET = process.env.GOOGLE_SECRET;
+
+export const startDate = new Date('01/01/2024');
+export const unixDay = 86400000;
