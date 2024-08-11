@@ -12,6 +12,7 @@ const current = async (req, res) => {
       weight: user.weight,
       liters: user.liters,
       avatarURL: user.avatarURL,
+      favoriteExercises: user.favoriteExercises,
     },
   });
 };

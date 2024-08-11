@@ -6,6 +6,10 @@ import { FIFTEEN_MINUTES, ONE_DAY, SECRET_KEY } from '../constants/index.js';
 import { Sessions } from '../models/session.js';
 import { createSession } from '../middlewares/createSession.js';
 import sendEmail from '../helpers/sendEmail.js';
+import {
+  getFullNameFromGoogleTokenPayload,
+  validateCode,
+} from '../helpers/googleAuth.js';
 
 const registerUser = async (payload) => {
   const user = await User.findOne({ email: payload.email });
@@ -144,6 +148,31 @@ const extraVerifyEmail = async (email) => {
   return await sendEmail.sendMailVerify(email, user.verificationToken);
 };
 
+const loginOrSignupWithGoogle = async (code) => {
+  const loginTicket = await validateCode(code);
+  const payload = loginTicket.getPayload();
+  if (!payload) throw HttpError(401);
+
+  let user = await User.findOne({ email: payload.email });
+  if (!user) {
+    const password = await bcrypt.hash('10', 10);
+    user = await User.create({
+      email: payload.email,
+      name: getFullNameFromGoogleTokenPayload(payload),
+      password,
+      verificationToken: null,
+      verify: true,
+    });
+  }
+
+  const newSession = await createSession(user._id);
+
+  return await Sessions.create({
+    userId: user._id,
+    ...newSession,
+  });
+};
+
 export default {
   registerUser,
   loginUser,
@@ -153,4 +182,5 @@ export default {
   verifyEmail,
   extraVerifyEmail,
   resetPassword,
+  loginOrSignupWithGoogle,
 };

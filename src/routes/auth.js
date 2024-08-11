@@ -4,6 +4,7 @@ import wrapper from '../helpers/wrapper.js';
 import controller from '../controllers/auth.js';
 import {
   authSchema,
+  loginWithGoogleOAuthSchema,
   resetEmailSchema,
   resetPasswordSchema,
 } from '../schemas/auth.js';
@@ -44,6 +45,14 @@ router.post(
   '/reset-password',
   validator.body(resetPasswordSchema),
   wrapper(controller.resetPassword),
+);
+
+router.get('/get-oauth-url', wrapper(controller.getGoogleAuthUrl));
+
+router.post(
+  '/confirm-oauth',
+  validator.body(loginWithGoogleOAuthSchema),
+  wrapper(controller.loginWithGoogle),
 );
 
 export default router;

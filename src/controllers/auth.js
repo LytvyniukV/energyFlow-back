@@ -1,4 +1,5 @@
 import { ONE_DAY } from '../constants/index.js';
+import { generateAuthUrl } from '../helpers/googleAuth.js';
 import { setupSession } from '../middlewares/createSession.js';
 import authServices from '../services/auth.js';
 
@@ -89,6 +90,28 @@ const resetPassword = async (req, res) => {
   });
 };
 
+const getGoogleAuthUrl = async (req, res) => {
+  const url = generateAuthUrl();
+
+  res.status(200).json({
+    message: 'Success',
+    data: {
+      url,
+    },
+  });
+};
+
+const loginWithGoogle = async (req, res) => {
+  const session = await authServices.loginOrSignupWithGoogle(req.body.code);
+  setupSession(res, session);
+
+  res.json({
+    message: 'Successfully logged in via Google OAuth!',
+    data: {
+      accessToken: session.accessToken,
+    },
+  });
+};
 export default {
   registerUser,
   loginUser,
@@ -98,4 +121,6 @@ export default {
   verifyEmail,
   extraVerifyEmail,
   resetPassword,
+  getGoogleAuthUrl,
+  loginWithGoogle,
 };
