@@ -1,38 +1,24 @@
 import { startOfMonth, endOfMonth, getDaysInMonth } from 'date-fns';
-import { Water } from '../models/water.js';
+import { Training } from '../models/trainings.js';
 import HttpError from '../helpers/httpError.js';
 
-const createWater = async (date, amount, ownerId) => {
-  return await Water.create({
-    date,
-    amount,
+const createTraining = async (ownerId, data) => {
+  return await Training.create({
     owner: ownerId,
+    ...data,
   });
 };
 
-const deleteWater = async (waterId, ownerId) => {
-  const water = await Water.findOneAndDelete({
-    _id: waterId,
+const deleteTraining = async (trainingId, ownerId) => {
+  const train = await Training.findOneAndDelete({
     owner: ownerId,
+    _id: trainingId,
   });
-  if (!water) throw HttpError(404, 'Water not found');
 
-  return water;
+  if (!train) throw HttpError(404, 'Training not found');
 };
 
-const updateWater = async (waterId, ownerId, updData) => {
-  const water = await Water.findOneAndUpdate(
-    { _id: waterId, owner: ownerId },
-    updData,
-    { new: true },
-  );
-
-  if (!water) throw HttpError(404);
-
-  return water;
-};
-
-const getDayWater = async (req) => {
+const getDayTrainings = async (req) => {
   const { _id: owner } = req.user;
   const dateParam = new Date(+req.params.date);
   const userTimezoneOffset = req.user.timezoneOffset || 0;
@@ -46,7 +32,7 @@ const getDayWater = async (req) => {
   const utcStart = startOfDay.getTime();
   const utcEnd = endOfDay.getTime();
 
-  const foundWaterDayData = await Water.find({
+  const foundTrainingsDayData = await Training.find({
     owner,
     date: {
       $gte: utcStart,
@@ -54,20 +40,14 @@ const getDayWater = async (req) => {
     },
   });
 
-  const totalDayWater = foundWaterDayData.reduce(
-    (acc, item) => acc + item.amount,
-    0,
-  );
-
   return {
     date: dateParam,
-    totalDayWater,
-    waterData: foundWaterDayData,
+    trainings: foundTrainingsDayData,
     owner,
   };
 };
 
-const getMonthWater = async (req) => {
+const getMonthTrainings = async (req) => {
   const { _id: owner } = req.user;
   const dateParam = new Date(+req.params.date);
   const startOfMonthDate = startOfMonth(dateParam);
@@ -82,7 +62,7 @@ const getMonthWater = async (req) => {
   const utcStartTime = startOfDay.getTime();
   const utcEndTime = endOfDay.getTime();
 
-  const foundWaterMonthData = await Water.find({
+  const foundTrainingMonthData = await Training.find({
     owner,
     date: {
       $gte: utcStartTime,
@@ -90,7 +70,7 @@ const getMonthWater = async (req) => {
     },
   });
 
-  const aggregatedMonthlyData = foundWaterMonthData.reduce((acc, item) => {
+  const aggregatedMonthlyData = foundTrainingMonthData.reduce((acc, item) => {
     const date = new Date(item.date);
     const dayOfMonth = date.getUTCDate();
 
@@ -99,10 +79,10 @@ const getMonthWater = async (req) => {
         dateParam: new Date(
           Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), dayOfMonth),
         ).toISOString(),
-        totalDayWater: 0,
+        totalCalories: 0,
       };
     }
-    acc[dayOfMonth].totalDayWater += item.amount;
+    acc[dayOfMonth].totalCalories += item.burnedCalories;
 
     return acc;
   }, {});
@@ -119,7 +99,7 @@ const getMonthWater = async (req) => {
       );
       result.push({
         dateParam: date.toISOString(),
-        totalDayWater: 0,
+        totalCalories: 0,
       });
     }
   }
@@ -127,29 +107,9 @@ const getMonthWater = async (req) => {
   return result;
 };
 
-const getSumaryAmount = async (req) => {
-  const { _id: owner } = req.user;
-  const startOfDay = new Date().setHours(0, 0, 0, 0);
-  const endOfDay = new Date().setHours(23, 59, 59, 999);
-
-  const todayDrinkWater = await Water.find({
-    owner,
-    date: {
-      $gte: startOfDay,
-      $lt: endOfDay,
-    },
-  });
-  const totalAmount = todayDrinkWater.reduce(
-    (sum, record) => sum + record.amount,
-    0,
-  );
-  return { totalAmount };
-};
 export default {
-  createWater,
-  deleteWater,
-  updateWater,
-  getDayWater,
-  getMonthWater,
-  getSumaryAmount,
+  createTraining,
+  deleteTraining,
+  getDayTrainings,
+  getMonthTrainings,
 };

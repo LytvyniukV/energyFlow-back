@@ -14,10 +14,8 @@ const schema = new Schema(
       },
       required: true,
     },
-    amount: {
-      type: Number,
-      min: 10,
-      max: 2000,
+    name: {
+      type: String,
       required: true,
     },
     owner: {
@@ -25,8 +23,20 @@ const schema = new Schema(
       ref: 'User',
       required: true,
     },
+    time: {
+      type: Number,
+      required: true,
+    },
+    muscles: {
+      type: String,
+      required: true,
+    },
+    burnedCalories: {
+      type: Number,
+      required: true,
+    },
   },
   { versionKey: false, timestamps: true },
 );
 
-export const Water = model('Water', schema);
+export const Training = model('Training', schema);

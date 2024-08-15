@@ -39,7 +39,7 @@ const getDayWater = async (req, res) => {
   const data = await services.getDayWater(req);
 
   res.status(200).json({
-    data: { ...data },
+    data: data,
   });
 };
 
