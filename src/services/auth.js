@@ -25,7 +25,6 @@ const registerUser = async (payload) => {
   });
 
   await sendEmail.sendMailVerify(payload.email, verifyToken);
-  await Sessions.deleteOne({ userId: newUser._id });
 
   const accessToken = jwt.sign({ id: newUser._id }, SECRET_KEY, {
     expiresIn: '3h',
