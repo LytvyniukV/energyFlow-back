@@ -63,7 +63,7 @@ const refreshUserSession = async (req, res) => {
 
 const verifyEmail = async (req, res) => {
   await authServices.verifyEmail(req.params.verificationToken);
-
+  res.redirect('https://energy-flow-mu.vercel.app/tracker');
   res.status(200).send({ message: 'Verification successfully' });
 };
 
