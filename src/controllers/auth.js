@@ -10,6 +10,7 @@ const registerUser = async (req, res) => {
     message: 'Successfull registration',
     data: {
       email: user.email,
+      accessToken: user.accessToken,
     },
   });
 };

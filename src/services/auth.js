@@ -25,8 +25,22 @@ const registerUser = async (payload) => {
   });
 
   await sendEmail.sendMailVerify(payload.email, verifyToken);
+  await Sessions.deleteOne({ userId: newUser._id });
 
-  return newUser;
+  const accessToken = jwt.sign({ id: newUser._id }, SECRET_KEY, {
+    expiresIn: '3h',
+  });
+  const refreshToken = jwt.sign({ id: newUser._id }, SECRET_KEY, {
+    expiresIn: '5h',
+  });
+  await Sessions.create({
+    userId: newUser._id,
+    accessToken,
+    refreshToken,
+    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+    refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+  });
+  return { email: newUser.email, accessToken };
 };
 
 const loginUser = async (payload) => {

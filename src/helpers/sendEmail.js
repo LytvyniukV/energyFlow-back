@@ -20,7 +20,7 @@ const sendMailVerify = async (email, verifyToken) => {
     to: email,
     from: 'lytvyniuk.vladyslav@gmail.com',
     subject: 'Verify your email',
-    html: `<p>Please, follow the <a href="http://localhost:3001/api/users/verify/${verifyToken}">link</a> to verify your email</p>`,
+    html: `<p>Please, follow the <a href="${SERVER_HOST}/api/users/verify/${verifyToken}">link</a> to verify your email</p>`,
     text: `Please, follow the link ${SERVER_HOST}/api/users/verify/${verifyToken} to verify your email`,
   });
 
