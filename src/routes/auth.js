@@ -28,7 +28,7 @@ router.get('/verify/:verificationToken', wrapper(controller.verifyEmail));
 
 router.post(
   '/verify',
-  validator.body(resetEmailSchema),
+  validateBody(resetEmailSchema),
   wrapper(controller.extraVerifyEmail),
 );
 

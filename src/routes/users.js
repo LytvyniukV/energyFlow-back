@@ -5,6 +5,7 @@ import controller from '../controllers/users.js';
 import { updUser } from '../schemas/users.js';
 import { upload } from '../helpers/cloudinary.js';
 import { isValidId } from '../middlewares/isValidId.js';
+import { validateBody } from '../helpers/validateBody.js';
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.get('/current', wrapper(controller.current));
 router.patch(
   '/',
   upload.single('avatar'),
-  validator.body(updUser),
+  validateBody(updUser),
   wrapper(controller.updateUser),
 );
 
