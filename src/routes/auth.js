@@ -1,5 +1,6 @@
 import express from 'express';
 import validator from '../helpers/validator.js';
+import { validateBody } from '../helpers/validateBody.js';
 import wrapper from '../helpers/wrapper.js';
 import controller from '../controllers/auth.js';
 import {
@@ -13,15 +14,11 @@ const router = express.Router();
 
 router.post(
   '/register',
-  validator.body(authSchema),
+  validateBody(authSchema),
   wrapper(controller.registerUser),
 );
 
-router.post(
-  '/login',
-  validator.body(authSchema),
-  wrapper(controller.loginUser),
-);
+router.post('/login', validateBody(authSchema), wrapper(controller.loginUser));
 
 router.post('/logout', wrapper(controller.logout));
 
