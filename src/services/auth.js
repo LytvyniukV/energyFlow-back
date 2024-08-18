@@ -24,7 +24,7 @@ const registerUser = async (payload) => {
     verificationToken: verifyToken,
   });
 
-  await sendEmail.sendMailVerify(payload.email, verifyToken);
+  // await sendEmail.sendMailVerify(payload.email, verifyToken);
 
   const accessToken = jwt.sign({ id: newUser._id }, SECRET_KEY, {
     expiresIn: '3h',
@@ -48,7 +48,7 @@ const loginUser = async (payload) => {
   const isEqual = await bcrypt.compare(payload.password, user.password);
 
   if (!isEqual) throw HttpError(401);
-  if (!user.verify) throw HttpError(401, 'Please, verify your email');
+  // if (!user.verify) throw HttpError(401, 'Please, verify your email');
   await Sessions.deleteOne({ userId: user._id });
 
   const accessToken = jwt.sign({ id: user._id }, SECRET_KEY, {
