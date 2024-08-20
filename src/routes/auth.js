@@ -9,6 +9,7 @@ import {
   resetEmailSchema,
   resetPasswordSchema,
 } from '../schemas/auth.js';
+import { validateRefreshToken } from '../middlewares/validateToken.js';
 
 const router = express.Router();
 
@@ -20,9 +21,13 @@ router.post(
 
 router.post('/login', validateBody(authSchema), wrapper(controller.loginUser));
 
-router.post('/logout', wrapper(controller.logout));
+router.post('/logout', validateRefreshToken, wrapper(controller.logout));
 
-router.post('/refresh', wrapper(controller.refreshUserSession));
+router.post(
+  '/refresh',
+  validateRefreshToken,
+  wrapper(controller.refreshUserSession),
+);
 
 router.get('/verify/:verificationToken', wrapper(controller.verifyEmail));
 

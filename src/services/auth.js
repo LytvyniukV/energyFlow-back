@@ -52,23 +52,19 @@ const loginUser = async (payload) => {
   return { accessToken, refreshToken };
 };
 
-const logout = async (refreshToken) => {
-  await Tokens.deleteOne({ refreshToken: refreshToken });
+const logout = async (userId) => {
+  await Tokens.deleteOne({ user: userId });
 };
 
-const refreshUsersSession = async (token) => {
-  if (!token) throw HttpError(401);
+const refreshUsersSession = async (userId) => {
+  const tokenData = await Tokens.findOne({ user: userId });
 
-  const userData = jwt.verify(token, SECRET_REFRESH_TOKEN_KEY);
+  if (!tokenData) throw HttpError(401);
 
-  const tokenData = await Tokens.findOne({ refreshToken: token });
+  const user = await User.findById(userId);
+  const { accessToken, refreshToken } = await createTokens(userId);
 
-  if (!userData || !tokenData) throw HttpError(401);
-
-  const user = await User.findById(userData.id);
-  const { accessToken, refreshToken } = await createTokens(userData.id);
-
-  await Tokens.findOneAndUpdate({ user: userData.id }, { refreshToken });
+  await Tokens.findOneAndUpdate({ user: userId }, { refreshToken });
 
   return {
     user,

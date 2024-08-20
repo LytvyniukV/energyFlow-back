@@ -4,42 +4,37 @@ import authServices from '../services/auth.js';
 
 const registerUser = async (req, res) => {
   const user = await authServices.registerUser(req.body);
-  setupCookie(res, user.refreshToken);
+
   res.status(201).json({
     message: 'Successfull registration',
     data: {
       email: user.email,
       accessToken: user.accessToken,
+      refreshToken: user.refreshToken,
     },
   });
 };
 
 const loginUser = async (req, res) => {
   const data = await authServices.loginUser(req.body);
-  setupCookie(res, data.refreshToken);
 
   res.status(200).json({
     message: 'Successfull login',
     data: {
       accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
     },
   });
 };
 
 const logout = async (req, res) => {
-  if (req.cookies.refreshToken) {
-    await authServices.logout(req.cookies.refreshToken);
-  }
-
-  res.clearCookie('refreshToken');
+  await authServices.logout(req.user._id);
 
   res.status(204).send();
 };
 
 const refreshUserSession = async (req, res) => {
-  const data = await authServices.refreshUsersSession(req.cookies.refreshToken);
-
-  setupCookie(res, data.refreshToken);
+  const data = await authServices.refreshUsersSession(req.user._id);
 
   res.json({
     status: 200,
