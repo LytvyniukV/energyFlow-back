@@ -51,6 +51,7 @@ const refreshUserSession = async (req, res) => {
         favoriteExercises: data.user.favoriteExercises,
       },
       accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
     },
   });
 };
