@@ -1,29 +1,18 @@
+import { SECRET_ACCESS_TOKEN_KEY } from '../constants/index.js';
 import HttpError from '../helpers/httpError.js';
 import { User } from '../models/users.js';
-import { Sessions } from '../models/session.js';
+import jwt from 'jsonwebtoken';
 
 export const validateToken = async (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) throw HttpError(401);
 
   const [bearer, token] = authHeader.split(' ', 2);
-  if (bearer !== 'Bearer') throw HttpError(401);
+  if (bearer !== 'Bearer' || !token) throw HttpError(401);
 
-  const session = await Sessions.findOne({ accessToken: token });
+  const userData = jwt.verify(token, SECRET_ACCESS_TOKEN_KEY);
 
-  if (!session) {
-    next(HttpError(401, 'Session not found'));
-    return;
-  }
-
-  const isAccessTokenExpired =
-    new Date() > new Date(session.accessTokenValidUntil);
-
-  if (isAccessTokenExpired) {
-    next(HttpError(401, 'Access token expired'));
-  }
-
-  const user = await User.findById(session.userId);
+  const user = await User.findById(userData.id);
 
   if (!user) {
     next(createHttpError(401));

@@ -1,11 +1,10 @@
-import { ONE_DAY } from '../constants/index.js';
 import { generateAuthUrl } from '../helpers/googleAuth.js';
-import { setupSession } from '../middlewares/createSession.js';
+import { setupCookie } from '../middlewares/createSession.js';
 import authServices from '../services/auth.js';
 
 const registerUser = async (req, res) => {
   const user = await authServices.registerUser(req.body);
-
+  setupCookie(res, user.refreshToken);
   res.status(201).json({
     message: 'Successfull registration',
     data: {
@@ -16,48 +15,47 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  const session = await authServices.loginUser(req.body);
-  res.cookie('refreshToken', session.refreshToken, {
-    httpOnly: true,
-    expires: new Date(Date.now() + ONE_DAY),
-  });
-  res.cookie('sessionId', session._id, {
-    httpOnly: true,
-    expires: new Date(Date.now() + ONE_DAY),
-  });
+  const data = await authServices.loginUser(req.body);
+  setupCookie(res, data.refreshToken);
 
   res.status(200).json({
     message: 'Successfull login',
     data: {
-      accessToken: session.accessToken,
+      accessToken: data.accessToken,
     },
   });
 };
 
 const logout = async (req, res) => {
-  if (req.cookies.sessionId) {
-    await authServices.logout(req.cookies.sessionId);
+  if (req.cookies.refreshToken) {
+    await authServices.logout(req.cookies.refreshToken);
   }
 
-  res.clearCookie('sessionId');
   res.clearCookie('refreshToken');
 
   res.status(204).send();
 };
 
 const refreshUserSession = async (req, res) => {
-  const session = await authServices.refreshUsersSession({
-    sessionId: req.cookies.sessionId,
-    refreshToken: req.cookies.refreshToken,
-  });
+  const data = await authServices.refreshUsersSession(req.cookies.refreshToken);
 
-  setupSession(res, session);
+  setupCookie(res, data.refreshToken);
 
   res.json({
     status: 200,
     message: 'Successfully refreshed a session!',
     data: {
-      accessToken: session.accessToken,
+      user: {
+        email: data.user.email,
+        gender: data.user.gender,
+        name: data.user.name,
+        activeTime: data.user.activeTime,
+        weight: data.user.weight,
+        liters: data.user.liters,
+        avatarURL: data.user.avatarURL,
+        favoriteExercises: data.user.favoriteExercises,
+      },
+      accessToken: data.accessToken,
     },
   });
 };
@@ -103,13 +101,13 @@ const getGoogleAuthUrl = async (req, res) => {
 };
 
 const loginWithGoogle = async (req, res) => {
-  const session = await authServices.loginOrSignupWithGoogle(req.body.code);
-  setupSession(res, session);
+  const data = await authServices.loginOrSignupWithGoogle(req.body.code);
+  setupCookie(res, data.refreshToken);
 
   res.json({
     message: 'Successfully logged in via Google OAuth!',
     data: {
-      accessToken: session.accessToken,
+      accessToken: data.accessToken,
     },
   });
 };

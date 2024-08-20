@@ -2,14 +2,18 @@ import { User } from '../models/users.js';
 import HttpError from '../helpers/httpError.js';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { FIFTEEN_MINUTES, ONE_DAY, SECRET_KEY } from '../constants/index.js';
-import { Sessions } from '../models/session.js';
-import { createSession } from '../middlewares/createSession.js';
+
+import { createTokens } from '../middlewares/createSession.js';
 import sendEmail from '../helpers/sendEmail.js';
 import {
   getFullNameFromGoogleTokenPayload,
   validateCode,
 } from '../helpers/googleAuth.js';
+import { Tokens } from '../models/tokens.js';
+import {
+  SECRET_ACCESS_TOKEN_KEY,
+  SECRET_REFRESH_TOKEN_KEY,
+} from '../constants/index.js';
 
 const registerUser = async (payload) => {
   const user = await User.findOne({ email: payload.email });
@@ -24,22 +28,12 @@ const registerUser = async (payload) => {
     verificationToken: verifyToken,
   });
 
+  await Tokens.deleteOne({ user: newUser._id });
+  const { accessToken, refreshToken } = await createTokens(newUser._id);
+  await Tokens.create({ user: newUser._id, refreshToken: refreshToken });
   // await sendEmail.sendMailVerify(payload.email, verifyToken);
 
-  const accessToken = jwt.sign({ id: newUser._id }, SECRET_KEY, {
-    expiresIn: '3h',
-  });
-  const refreshToken = jwt.sign({ id: newUser._id }, SECRET_KEY, {
-    expiresIn: '5h',
-  });
-  await Sessions.create({
-    userId: newUser._id,
-    accessToken,
-    refreshToken,
-    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
-  });
-  return { email: newUser.email, accessToken };
+  return { email: newUser.email, accessToken, refreshToken };
 };
 
 const loginUser = async (payload) => {
@@ -49,59 +43,44 @@ const loginUser = async (payload) => {
 
   if (!isEqual) throw HttpError(401);
   // if (!user.verify) throw HttpError(401, 'Please, verify your email');
-  await Sessions.deleteOne({ userId: user._id });
+  await Tokens.deleteOne({ user: user._id });
 
-  const accessToken = jwt.sign({ id: user._id }, SECRET_KEY, {
-    expiresIn: '3h',
-  });
-  const refreshToken = jwt.sign({ id: user._id }, SECRET_KEY, {
-    expiresIn: '5h',
-  });
+  const { accessToken, refreshToken } = await createTokens(user._id);
 
-  return await Sessions.create({
-    userId: user._id,
+  await Tokens.create({ user: user._id, refreshToken });
+
+  return { accessToken, refreshToken };
+};
+
+const logout = async (refreshToken) => {
+  await Tokens.deleteOne({ refreshToken: refreshToken });
+};
+
+const refreshUsersSession = async (token) => {
+  if (!token) throw HttpError(401);
+
+  const userData = jwt.verify(token, SECRET_REFRESH_TOKEN_KEY);
+
+  const tokenData = await Tokens.findOne({ refreshToken: token });
+
+  if (!userData || !tokenData) throw HttpError(401);
+
+  const user = await User.findById(userData.id);
+  const { accessToken, refreshToken } = await createTokens(userData.id);
+
+  await Tokens.findOneAndUpdate({ user: userData.id }, { refreshToken });
+
+  return {
+    user,
     accessToken,
     refreshToken,
-    accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
-    refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
-  });
-};
-
-const logout = async (sessionId) => {
-  await Sessions.deleteOne({ _id: sessionId });
-};
-
-const refreshUsersSession = async ({ sessionId, refreshToken }) => {
-  const session = await Sessions.findOne({
-    _id: sessionId,
-    refreshToken,
-  });
-
-  if (!session) {
-    throw HttpError(401, 'Session not found');
-  }
-
-  const isSessionTokenExpired =
-    new Date() > new Date(session.refreshTokenValidUntil);
-
-  if (isSessionTokenExpired) {
-    throw HttpError(401, 'Session token expired');
-  }
-
-  const newSession = await createSession(sessionId);
-
-  await Sessions.deleteOne({ _id: sessionId, refreshToken });
-
-  return await Sessions.create({
-    userId: session.userId,
-    ...newSession,
-  });
+  };
 };
 
 const resetTokenByEmail = async (email) => {
   const user = await User.findOne({ email });
   if (!user) {
-    throw createHttpError(404, 'User not found');
+    throw HttpError(404, 'User not found');
   }
 
   const resetToken = jwt.sign(
@@ -122,7 +101,7 @@ const resetPassword = async (payload) => {
   let entries;
 
   try {
-    entries = jwt.verify(payload.token, SECRET_KEY);
+    entries = jwt.verify(payload.token, SECRET_ACCESS_TOKEN_KEY);
   } catch (err) {
     if (err instanceof Error) throw HttpError(401, err.message);
     throw err;
@@ -177,13 +156,12 @@ const loginOrSignupWithGoogle = async (code) => {
       verify: true,
     });
   }
+  await Tokens.deleteOne({ user: user._id });
+  const { accessToken, refreshToken } = await createTokens(user._id);
 
-  const newSession = await createSession(user._id);
+  await Tokens.create({ user: user._id, refreshToken });
 
-  return await Sessions.create({
-    userId: user._id,
-    ...newSession,
-  });
+  return { accessToken, refreshToken };
 };
 
 export default {
