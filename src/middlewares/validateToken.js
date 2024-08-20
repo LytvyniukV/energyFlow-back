@@ -18,7 +18,7 @@ export const validateToken = async (req, res, next) => {
   const user = await User.findById(userData.id);
 
   if (!user) {
-    next(createHttpError(401));
+    next(HttpError(401));
     return;
   }
 
@@ -39,7 +39,7 @@ export const validateRefreshToken = async (req, res, next) => {
   const user = await User.findById(userData.id);
 
   if (!user || !userData) {
-    next(createHttpError(401));
+    next(HttpError(401));
     return;
   }
 
