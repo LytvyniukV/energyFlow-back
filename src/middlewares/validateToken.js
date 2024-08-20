@@ -3,6 +3,7 @@ import {
   SECRET_REFRESH_TOKEN_KEY,
 } from '../constants/index.js';
 import HttpError from '../helpers/httpError.js';
+import { Tokens } from '../models/tokens.js';
 import { User } from '../models/users.js';
 import jwt from 'jsonwebtoken';
 
@@ -35,10 +36,10 @@ export const validateRefreshToken = async (req, res, next) => {
   if (bearer !== 'Bearer' || !token) throw HttpError(401);
 
   const userData = jwt.verify(token, SECRET_REFRESH_TOKEN_KEY);
-
+  const tokenData = await Tokens.findOne({ refreshToken: token });
   const user = await User.findById(userData.id);
 
-  if (!user || !userData) {
+  if (!user || !userData || !tokenData) {
     next(HttpError(401));
     return;
   }

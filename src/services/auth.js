@@ -57,10 +57,6 @@ const logout = async (userId) => {
 };
 
 const refreshUsersSession = async (userId) => {
-  const tokenData = await Tokens.findOne({ user: userId });
-
-  if (!tokenData) throw HttpError(401);
-
   const user = await User.findById(userId);
   const { accessToken, refreshToken } = await createTokens(userId);
 
