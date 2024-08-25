@@ -28,7 +28,7 @@ const registerUser = async (payload) => {
   await Tokens.deleteOne({ user: newUser._id });
   const { accessToken, refreshToken } = await createTokens(newUser._id);
   await Tokens.create({ user: newUser._id, refreshToken: refreshToken });
-  // await sendEmail.sendMailVerify(payload.email, verifyToken);
+  await sendEmail.sendMailVerify(payload.email, verifyToken);
 
   return { email: newUser.email, accessToken, refreshToken };
 };
@@ -39,7 +39,7 @@ const loginUser = async (payload) => {
   const isEqual = await bcrypt.compare(payload.password, user.password);
 
   if (!isEqual) throw HttpError(401);
-  // if (!user.verify) throw HttpError(401, 'Please, verify your email');
+  if (!user.verify) throw HttpError(401, 'Please, verify your email');
   await Tokens.deleteOne({ user: user._id });
 
   const { accessToken, refreshToken } = await createTokens(user._id);
