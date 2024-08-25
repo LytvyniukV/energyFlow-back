@@ -99,12 +99,12 @@ const getGoogleAuthUrl = async (req, res) => {
 
 const loginWithGoogle = async (req, res) => {
   const data = await authServices.loginOrSignupWithGoogle(req.body.code);
-  setupCookie(res, data.refreshToken);
 
   res.json({
     message: 'Successfully logged in via Google OAuth!',
     data: {
       accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
     },
   });
 };
