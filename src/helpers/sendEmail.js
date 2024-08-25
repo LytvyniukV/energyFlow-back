@@ -8,6 +8,8 @@ const sendMailResetPassword = async (email, token) => {
     to: email,
     from: 'lytvyniuk.vladyslav@gmail.com',
     subject: 'Reset your password',
+    // html: `<p>Please, follow the <a href="https://localhost:5173/reset-password?token=${token}">link</a> to reset your password</p>`,
+    // text: `Please, follow the link https://localhost:5173/reset-password?token=${token} to reset your password`,
     html: `<p>Please, follow the <a href="https://energy-flow-mu.vercel.app/reset-password?token=${token}">link</a> to reset your password</p>`,
     text: `Please, follow the link https://energy-flow-mu.vercel.app/reset-password?token=${token} to reset your password`,
   });
