@@ -39,13 +39,13 @@ router.post(
 
 router.post(
   '/reset-token',
-  validator.body(resetEmailSchema),
+  validateBody(resetEmailSchema),
   wrapper(controller.resetTokenByEmail),
 );
 
 router.post(
   '/reset-password',
-  validator.body(resetPasswordSchema),
+  validateBody(resetPasswordSchema),
   wrapper(controller.resetPassword),
 );
 
@@ -53,7 +53,7 @@ router.get('/get-oauth-url', wrapper(controller.getGoogleAuthUrl));
 
 router.post(
   '/confirm-oauth',
-  validator.body(loginWithGoogleOAuthSchema),
+  validateBody(loginWithGoogleOAuthSchema),
   wrapper(controller.loginWithGoogle),
 );
 
