@@ -70,7 +70,11 @@ const extraVerifyEmail = async (req, res) => {
 
 const resetTokenByEmail = async (req, res) => {
   await authServices.resetTokenByEmail(req.body.email);
-  return res.redirect('https://energy-flow-mu.vercel.app/login');
+
+  res.json({
+    message: 'Reset password email was successfully sent!',
+    data: {},
+  });
 };
 
 const resetPassword = async (req, res) => {
