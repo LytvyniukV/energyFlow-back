@@ -10,10 +10,7 @@ import {
   validateCode,
 } from '../helpers/googleAuth.js';
 import { Tokens } from '../models/tokens.js';
-import {
-  SECRET_ACCESS_TOKEN_KEY,
-  SECRET_REFRESH_TOKEN_KEY,
-} from '../constants/index.js';
+import { SECRET_ACCESS_TOKEN_KEY } from '../constants/index.js';
 
 const registerUser = async (payload) => {
   const user = await User.findOne({ email: payload.email });
@@ -80,7 +77,7 @@ const resetTokenByEmail = async (email) => {
       sub: user._id,
       email,
     },
-    SECRET_KEY,
+    SECRET_ACCESS_TOKEN_KEY,
     {
       expiresIn: '15m',
     },
