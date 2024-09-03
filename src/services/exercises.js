@@ -21,22 +21,21 @@ const getAll = async (queryParams) => {
     exercisesQuery.where('equipment').equals(equipment);
   }
 
+  if (q) {
+    exercises = exercises.filter((item) => {
+      return (
+        item.target.startsWith(q) ||
+        item.bodyPart.startsWith(q) ||
+        item.equipment.startsWith(q)
+      );
+    });
+  }
   let [exerciseCount, exercises] = await Promise.all([
     Exercises.find().merge(exercisesQuery).countDocuments(),
     exercisesQuery.skip(skip).limit(limit).exec(),
   ]);
 
   if (!exercises) throw HttpError(404, 'Exercises not found');
-
-  if (q) {
-    exercises = exercises.filter((item) => {
-      return (
-        item.target.includes(q) ||
-        item.bodyPart.includes(q) ||
-        item.equipment.includes(q)
-      );
-    });
-  }
 
   const paginationData = calculatePaginationData(exerciseCount, perPage, page);
 
