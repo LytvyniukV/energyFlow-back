@@ -19,3 +19,7 @@ connection
     console.log(`Database not running. Error message: ${err.message}`);
     process.exit(1);
   });
+
+const mail = 'lytvyniuk.vladyslav@gmail.com';
+const name = mail.split('@')[0];
+console.log(name);

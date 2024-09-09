@@ -12,6 +12,7 @@ const exercises = new Schema(
     burnedCalories: { type: Number },
     time: { type: Number },
     popularity: { type: Number },
+    reviews: { type: Number },
   },
   { versionKey: false },
 );

@@ -1,7 +1,9 @@
 import { calculatePaginationData } from '../helpers/calculatePaginationData.js';
+import { countRating } from '../helpers/countRating.js';
 import HttpError from '../helpers/httpError.js';
 import { Exercises } from '../models/exercises.js';
-
+import { Reviews } from '../models/reviews.js';
+import { User } from '../models/users.js';
 const getAll = async (queryParams) => {
   const { bodyParts, muscles, equipment, q } = queryParams;
   const { page = 1, perPage = 10 } = queryParams;
@@ -53,4 +55,44 @@ const getById = async (id) => {
   return exercise;
 };
 
-export default { getAll, getById };
+const leaveReview = async (userId, exerciseId, userReview) => {
+  const user = await User.findById(userId);
+  console.log(user);
+  const review = await Reviews.create({
+    exerciseId,
+    userName: user.name,
+    userAvatar: user.avatarURL,
+    ...userReview,
+  });
+  const exerciseReviews = await Reviews.find({ exerciseId });
+  const ratingData = countRating(exerciseReviews);
+  const exercise = await Exercises.findByIdAndUpdate(
+    exerciseId,
+    {
+      rating: ratingData.rating,
+      reviews: ratingData.totalReviews,
+    },
+    { new: true },
+  );
+
+  if (!user || !exercise) throw HttpError(404);
+  return {
+    review,
+    exercise: { rating: exercise.rating, reviews: exercise.reviews },
+  };
+};
+
+const getReviews = async (exerciseId, queryParams) => {
+  const { page = 1, perPage = 10 } = queryParams;
+  const options = {
+    page: page,
+    limit: perPage,
+    customLabels: {
+      docs: 'data',
+    },
+  };
+  const reviews = (await Reviews.paginate({ exerciseId }, options)) || [];
+
+  return reviews;
+};
+export default { getAll, getById, leaveReview, getReviews };

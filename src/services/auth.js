@@ -18,10 +18,11 @@ const registerUser = async (payload) => {
 
   const hashPassword = await bcrypt.hash(payload.password, 10);
   const verifyToken = crypto.randomUUID();
-
+  const userName = payload.email.split('@')[0];
   const newUser = await User.create({
     email: payload.email,
     password: hashPassword,
+    name: userName,
     verificationToken: verifyToken,
   });
 
