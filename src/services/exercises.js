@@ -23,6 +23,10 @@ const getAll = async (queryParams) => {
     exercisesQuery.where('equipment').equals(equipment);
   }
 
+  let [exerciseCount, exercises] = await Promise.all([
+    Exercises.find().merge(exercisesQuery).countDocuments(),
+    exercisesQuery.skip(skip).limit(limit).exec(),
+  ]);
   if (q) {
     exercises = exercises.filter((item) => {
       return (
@@ -32,11 +36,6 @@ const getAll = async (queryParams) => {
       );
     });
   }
-  let [exerciseCount, exercises] = await Promise.all([
-    Exercises.find().merge(exercisesQuery).countDocuments(),
-    exercisesQuery.skip(skip).limit(limit).exec(),
-  ]);
-
   if (!exercises) throw HttpError(404, 'Exercises not found');
 
   const paginationData = calculatePaginationData(exerciseCount, perPage, page);
