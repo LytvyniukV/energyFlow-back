@@ -13,7 +13,7 @@ const getById = async (req, res) => {
 
   res.status(200).json({
     message: 'Succsess',
-    data: exercise,
+    data: { exercise: exercise.exercise, reviews: exercise.reviews },
   });
 };
 
@@ -26,7 +26,7 @@ const leaveReview = async (req, res) => {
 
   res.status(201).json({
     message: 'Review created',
-    data: { ...review },
+    data: { exercise: review.exercise, reviews: review.review },
   });
 };
 

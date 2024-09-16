@@ -48,10 +48,10 @@ const getAll = async (queryParams) => {
 
 const getById = async (id) => {
   const exercise = await Exercises.findById(id);
-
+  const reviews = await Reviews.findOne({ exerciseId: id });
   if (!exercise) throw HttpError(404, 'Exercise not found');
 
-  return exercise;
+  return { exercise, reviews };
 };
 
 const leaveReview = async (userId, exerciseId, userReview) => {
@@ -77,7 +77,7 @@ const leaveReview = async (userId, exerciseId, userReview) => {
   if (!user || !exercise) throw HttpError(404);
   return {
     review,
-    exercise: { rating: exercise.rating, reviews: exercise.reviews },
+    exercise,
   };
 };
 
