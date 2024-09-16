@@ -76,7 +76,7 @@ const leaveReview = async (userId, exerciseId, userReview) => {
 
   if (!user || !exercise) throw HttpError(404);
   return {
-    review,
+    review: exerciseReviews,
     exercise,
   };
 };
