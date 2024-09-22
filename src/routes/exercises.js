@@ -10,9 +10,8 @@ router.get('/', wrapper(controller.getAll));
 router.get('/:id', isValidId, wrapper(controller.getById));
 router.post(
   '/reviews/:id',
-  isValidId,
   validateBody(reviewSchema),
   wrapper(controller.leaveReview),
 );
-router.get('/reviews/:id', isValidId, wrapper(controller.getReviews));
+router.get('/reviews/:id', wrapper(controller.getReviews));
 export default router;

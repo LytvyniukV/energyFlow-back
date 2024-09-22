@@ -56,8 +56,8 @@ const getById = async (id) => {
 
 const leaveReview = async (userId, exerciseId, userReview) => {
   const user = await User.findById(userId);
-  console.log(user);
-  const review = await Reviews.create({
+
+  await Reviews.create({
     exerciseId,
     userName: user.name,
     userAvatar: user.avatarURL,
